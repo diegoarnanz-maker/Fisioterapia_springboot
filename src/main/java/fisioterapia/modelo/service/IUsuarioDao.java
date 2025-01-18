@@ -10,4 +10,6 @@ public interface IUsuarioDao extends ICrudGenerico<Usuario, String> {
 
         List<Usuario> findByRole(String role);
 
+        Usuario findByUsername(String name);
+
 }

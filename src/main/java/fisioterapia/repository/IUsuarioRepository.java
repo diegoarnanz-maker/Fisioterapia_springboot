@@ -1,6 +1,7 @@
 package fisioterapia.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,5 +15,7 @@ public interface IUsuarioRepository extends JpaRepository<Usuario, String> {
 
     @Query("SELECT u FROM Usuario u JOIN u.perfiles p WHERE p.nombre = :roleName")
     List<Usuario> findByRole(@Param("roleName") String roleName);
+
+    Optional<Usuario> findByUsername(String name);
 
 }

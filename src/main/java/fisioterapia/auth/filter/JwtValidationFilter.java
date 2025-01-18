@@ -35,7 +35,6 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
         String header = request.getHeader(TokenJwtConfig.HEADER_AUTHORIZATION);
 
-        // Si no hay encabezado de autorización o no es un token JWT, pasamos al siguiente filtro
         if (header == null || !header.startsWith(TokenJwtConfig.PREFIX_TOKEN)) {
             chain.doFilter(request, response);
             return;
@@ -43,29 +42,22 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
         String token = header.replace(TokenJwtConfig.PREFIX_TOKEN, "");
         try {
-            // Parseamos el token y extraemos los claims
             Claims claims = Jwts.parser().verifyWith(TokenJwtConfig.SECRET_KEY).build().parseSignedClaims(token).getPayload();
 
-            // Extraemos el nombre de usuario del token
             String username = claims.getSubject();
             
-            // Extraemos las autoridades (roles) del token
             Object authoritiesClaims = claims.get("authorities");
             Collection<? extends GrantedAuthority> roles = Arrays.asList(new ObjectMapper()
                     .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
 
-            // Creamos el token de autenticación con los roles extraídos
             UsernamePasswordAuthenticationToken authenticationToken = 
                     new UsernamePasswordAuthenticationToken(username, null, roles);
 
-            // Establecemos el contexto de seguridad
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-            // Continuamos con el siguiente filtro
             chain.doFilter(request, response);
 
         } catch (JwtException e) {
-            // Si el token es inválido, devolvemos un error 401 con el mensaje correspondiente
             Map<String, String> body = new HashMap<>();
             body.put("error", e.getMessage());
             body.put("message", "El token es inválido!");

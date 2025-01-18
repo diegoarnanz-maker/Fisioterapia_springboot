@@ -78,4 +78,13 @@ public class UsuarioDaoImplJpaMy8 implements IUsuarioDao {
         }
     }
 
+    @Override
+    public Usuario findByUsername(String name) {
+        try{
+            return usuarioRepository.findByUsername(name).orElse(null);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al buscar el usuario por nombre de usuario", e);
+        }
+    }
+
 }

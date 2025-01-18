@@ -39,7 +39,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String password = null;
 
         try {
-            // Usamos Jackson para deserializar el cuerpo de la solicitud
             Usuario usuario = new ObjectMapper().readValue(request.getInputStream(), Usuario.class);
             username = usuario.getUsername();
             password = usuario.getPassword();
@@ -47,30 +46,26 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             e.printStackTrace();
         }
 
-        // Crea un token con el nombre de usuario y la contraseña
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
                 password);
 
-        // Intenta autenticar al usuario con los datos proporcionados
         return this.authenticationManager.authenticate(authenticationToken);
     }
 
     // Si la autenticación es exitosa, generamos el JWT y lo devolvemos en la respuesta
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-            Authentication authResult) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authResult.getPrincipal();
         String username = user.getUsername();
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 
-        // Creamos un objeto de claims que contiene el nombre de usuario y los roles
-        Claims claims = Jwts.claims()
+        Claims claims = Jwts
+                .claims()
                 .add("authorities", new ObjectMapper().writeValueAsString(roles))
                 .add("username", username)
                 .build();
 
-        // Generamos el token JWT
         String jwt = Jwts.builder()
                 .subject(username)
                 .claims(claims)
@@ -79,10 +74,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .expiration(new Date(System.currentTimeMillis() + 3600000))  // El token expira en 1 hora
                 .compact();
 
-        // Añadimos el token al encabezado de la respuesta
         response.addHeader(TokenJwtConfig.HEADER_AUTHORIZATION, TokenJwtConfig.PREFIX_TOKEN + jwt);
 
-        // Cuerpo de la respuesta en formato JSON
+        // Respondemos con un mensaje de éxito
         Map<String, String> body = new HashMap<>();
         body.put("token", jwt);
         body.put("username", username);
@@ -93,7 +87,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setStatus(200);
     }
 
-    // Si la autenticación falla, respondemos con un mensaje de error
+    // Si la autenticación falla
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
@@ -104,6 +98,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.setContentType(TokenJwtConfig.CONTENT_TYPE);
-        response.setStatus(401);  // Código de error de autenticación
+        response.setStatus(401);
     }
 }
