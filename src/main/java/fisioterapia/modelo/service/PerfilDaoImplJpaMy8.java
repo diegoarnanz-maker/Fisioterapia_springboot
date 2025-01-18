@@ -60,4 +60,13 @@ public class PerfilDaoImplJpaMy8 implements IPerfilDao {
         }
     }
 
+    @Override
+    public Optional<Perfil> findByName(String nombre) {
+        try {
+            return perfilRepository.findByNombre(nombre);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al buscar el perfil por nombre");
+        }
+    }
+
 }

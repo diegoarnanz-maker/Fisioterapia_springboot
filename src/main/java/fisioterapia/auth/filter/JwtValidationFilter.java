@@ -1,5 +1,6 @@
 package fisioterapia.auth.filter;
 
+import fisioterapia.auth.SimpleGrantedAuthorityJsonCreator;
 import fisioterapia.auth.TokenJwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -23,6 +24,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static fisioterapia.auth.TokenJwtConfig.*;
+
 public class JwtValidationFilter extends BasicAuthenticationFilter {
 
     public JwtValidationFilter(AuthenticationManager authenticationManager) {
@@ -33,25 +36,29 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        String header = request.getHeader(TokenJwtConfig.HEADER_AUTHORIZATION);
+        String header = request.getHeader(HEADER_AUTHORIZATION);
 
-        if (header == null || !header.startsWith(TokenJwtConfig.PREFIX_TOKEN)) {
+        if (header == null || !header.startsWith(PREFIX_TOKEN)) {
             chain.doFilter(request, response);
             return;
         }
 
-        String token = header.replace(TokenJwtConfig.PREFIX_TOKEN, "");
+        String token = header.replace(PREFIX_TOKEN, "");
         try {
-            Claims claims = Jwts.parser().verifyWith(TokenJwtConfig.SECRET_KEY).build().parseSignedClaims(token).getPayload();
+            Claims claims = Jwts.parser()
+                    .verifyWith(SECRET_KEY)
+                    .build()
+                    .parseSignedClaims(token).getPayload();
 
             String username = claims.getSubject();
-            
+
             Object authoritiesClaims = claims.get("authorities");
+
             Collection<? extends GrantedAuthority> roles = Arrays.asList(new ObjectMapper()
+            .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
                     .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
 
-            UsernamePasswordAuthenticationToken authenticationToken = 
-                    new UsernamePasswordAuthenticationToken(username, null, roles);
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, roles);
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
@@ -64,7 +71,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
             response.getWriter().write(new ObjectMapper().writeValueAsString(body));
             response.setStatus(401);
-            response.setContentType(TokenJwtConfig.CONTENT_TYPE);
+            response.setContentType(CONTENT_TYPE);
         }
     }
 }
