@@ -12,4 +12,6 @@ public interface IUsuarioDao extends ICrudGenerico<Usuario, String> {
 
         Usuario findByUsername(String name);
 
+        boolean existsByEmail(String email);
+
 }

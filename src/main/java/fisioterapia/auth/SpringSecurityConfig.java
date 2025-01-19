@@ -41,9 +41,10 @@ public class SpringSecurityConfig {
 
                 // Rutas de usuarios (solo ADMIN puede crear y gestionar usuarios)
                 .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMON")
-                .requestMatchers(HttpMethod.POST, "/api/usuarios").hasAuthority("ROLE_ADMON")
-                .requestMatchers(HttpMethod.PUT, "/api/usuarios/{username}").hasAuthority("ROLE_ADMON")
-                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/{username}").hasAuthority("ROLE_ADMON")
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/{username}").hasRole("ADMON")
+                .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMON")
+                .requestMatchers(HttpMethod.PUT, "/api/usuarios/{username}").hasRole("ADMON")
+                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/{username}").hasRole("ADMON")
 
                 .anyRequest().authenticated())
 

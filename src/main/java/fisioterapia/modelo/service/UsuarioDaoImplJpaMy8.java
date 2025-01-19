@@ -87,4 +87,13 @@ public class UsuarioDaoImplJpaMy8 implements IUsuarioDao {
         }
     }
 
+    @Override
+    public boolean existsByEmail(String email) {
+        try{
+            return usuarioRepository.existsByEmail(email);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al buscar el usuario por email", e);
+        }
+    }
+
 }
