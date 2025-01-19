@@ -46,6 +46,13 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/usuarios/{username}").hasRole("ADMON")
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/{username}").hasRole("ADMON")
 
+                //Rutas de roles (solo ADMIN puede crear y gestionar roles)
+                .requestMatchers(HttpMethod.GET, "/api/roles").hasRole("ADMON")
+                .requestMatchers(HttpMethod.GET, "/api/roles/{id}").hasRole("ADMON")
+                .requestMatchers(HttpMethod.POST, "/api/roles").hasRole("ADMON")
+                .requestMatchers(HttpMethod.PUT, "/api/roles/{id}").hasRole("ADMON")
+                .requestMatchers(HttpMethod.DELETE, "/api/roles/{id}").hasRole("ADMON")
+
                 .anyRequest().authenticated())
 
                 // .cors(cors -> cors.configurationSource(configurationSource()))

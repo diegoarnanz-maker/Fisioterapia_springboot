@@ -1,4 +1,4 @@
-package fisioterapia.controller;
+package fisioterapia.restcontroller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -71,12 +71,13 @@ public class UsuarioControllerTest {
     }
 
     @Test
-    public void testCrearUsuario() throws Exception {
+    public void testCrearUsuarioConRoleCliente() throws Exception {
         String username = "admin";
         String password = "12345678";
 
         String token = obtenerTokenJwt(username, password);
 
+        // Crear un nuevo usuario
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsername("nuevoUsuario");
         nuevoUsuario.setPassword("12345678");
@@ -87,20 +88,125 @@ public class UsuarioControllerTest {
         nuevoUsuario.setFechaRegistro(new Date());
         nuevoUsuario.setEnabled(true);
 
-        Role role = roleDao.findByName("ROLE_CLIENTE").orElseThrow(() -> new Exception("Role no encontrado"));
+        // Asignamos el rol ROLE_CLIENTE
+        Role roleCliente = roleDao.findByName("ROLE_CLIENTE").orElseThrow(() -> new Exception("Role no encontrado"));
+        nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleCliente)));
 
-        nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(role)));
-
+        // Convertir el usuario a JSON
         String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
 
+        // Realizamos la petición para crear el usuario con ROLE_CLIENTE
         mockMvc.perform(post("/api/usuarios")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonUsuario))
-                .andExpect(status().isCreated())
+                .andExpect(status().isCreated()) // Se espera que el usuario sea creado
                 .andExpect(jsonPath("$.username").value("nuevoUsuario"))
                 .andExpect(jsonPath("$.email").value("nuevoUsuario@example.com"))
                 .andExpect(jsonPath("$.roles[0].nombre").value("ROLE_CLIENTE"));
+    }
+
+    @Test
+    public void testCrearUsuarioConRoleAdmon() throws Exception {
+        String username = "admin"; // Usuario con el rol ROLE_ADMON
+        String password = "12345678";
+
+        String token = obtenerTokenJwt(username, password);
+
+        // Crear un nuevo usuario con ROLE_ADMON
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setUsername("nuevoUsuarioAdmon");
+        nuevoUsuario.setPassword("12345678");
+        nuevoUsuario.setEmail("nuevoUsuarioAdmon@example.com");
+        nuevoUsuario.setNombre("Nuevo Usuario Admon");
+        nuevoUsuario.setApellidos("Apellido Usuario Admon");
+        nuevoUsuario.setDireccion("nuevoUsuarioAdmon Direccion");
+        nuevoUsuario.setFechaRegistro(new Date());
+        nuevoUsuario.setEnabled(true);
+
+        // Asignamos el rol ROLE_ADMON
+        Role roleAdmon = roleDao.findByName("ROLE_ADMON").orElseThrow(() -> new Exception("Role no encontrado"));
+        nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleAdmon)));
+
+        // Convertir el usuario a JSON
+        String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
+
+        // Realizamos la petición para crear el usuario con ROLE_ADMON
+        mockMvc.perform(post("/api/usuarios")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonUsuario))
+                .andExpect(status().isCreated()) // Se espera que el usuario sea creado
+                .andExpect(jsonPath("$.username").value("nuevoUsuarioAdmon"))
+                .andExpect(jsonPath("$.email").value("nuevoUsuarioAdmon@example.com"))
+                .andExpect(jsonPath("$.roles[0].nombre").value("ROLE_ADMON"));
+    }
+
+    @Test
+    public void testCrearUsuarioConRoleAdmonSinPermiso() throws Exception {
+        String username = "cliente";
+        String password = "12345678";
+
+        String token = obtenerTokenJwt(username, password);
+
+        // Crear un nuevo usuario con ROLE_ADMON
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setUsername("nuevoUsuario");
+        nuevoUsuario.setPassword("12345678");
+        nuevoUsuario.setEmail("nuevoUsuario@example.com");
+        nuevoUsuario.setNombre("Nuevo Usuario");
+        nuevoUsuario.setApellidos("Apellido Usuario");
+        nuevoUsuario.setDireccion("nuevoUsuario Direccion");
+        nuevoUsuario.setFechaRegistro(new Date());
+        nuevoUsuario.setEnabled(true);
+
+        // Asignamos el rol ROLE_ADMON
+        Role roleAdmon = roleDao.findByName("ROLE_ADMON").orElseThrow(() -> new Exception("Role no encontrado"));
+        nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleAdmon)));
+
+        // Convertir el usuario a JSON
+        String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
+
+        // Intentar crear un usuario con ROLE_ADMON sin ser un admin
+        mockMvc.perform(post("/api/usuarios")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonUsuario))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void testCrearUsuarioConRoleFisioSinPermiso() throws Exception {
+        String username = "fisioterapeuta"; // Usuario sin el rol de ADMIN
+        String password = "12345678";
+
+        String token = obtenerTokenJwt(username, password);
+
+        // Crear un nuevo usuario con ROLE_FISIO
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setUsername("nuevoUsuario");
+        nuevoUsuario.setPassword("12345678");
+        nuevoUsuario.setEmail("nuevoUsuario@example.com");
+        nuevoUsuario.setNombre("Nuevo Usuario");
+        nuevoUsuario.setApellidos("Apellido Usuario");
+        nuevoUsuario.setDireccion("nuevoUsuario Direccion");
+        nuevoUsuario.setFechaRegistro(new Date());
+        nuevoUsuario.setEnabled(true);
+
+        // Asignamos el rol ROLE_FISIO
+        Role roleFisio = roleDao.findByName("ROLE_FISIOTERAPEUTA")
+                .orElseThrow(() -> new Exception("Role no encontrado"));
+        nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleFisio)));
+
+        // Convertir el usuario a JSON
+        String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
+
+        // Intentar crear un usuario con ROLE_FISIO sin ser un admin
+        mockMvc.perform(post("/api/usuarios")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonUsuario))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -155,7 +261,6 @@ public class UsuarioControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    
     // Método para generar el token JWT
     private String obtenerTokenJwt(String username, String password) throws Exception {
 
