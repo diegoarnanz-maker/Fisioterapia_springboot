@@ -1,7 +1,6 @@
 package fisioterapia.auth.filter;
 
 import fisioterapia.auth.SimpleGrantedAuthorityJsonCreator;
-import fisioterapia.auth.TokenJwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -44,6 +43,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
         }
 
         String token = header.replace(PREFIX_TOKEN, "");
+
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(SECRET_KEY)
@@ -55,16 +55,16 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             Object authoritiesClaims = claims.get("authorities");
 
             Collection<? extends GrantedAuthority> roles = Arrays.asList(new ObjectMapper()
-            .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
+                    .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJsonCreator.class)
                     .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, roles);
-
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, roles);
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
             chain.doFilter(request, response);
 
         } catch (JwtException e) {
+
             Map<String, String> body = new HashMap<>();
             body.put("error", e.getMessage());
             body.put("message", "El token es inválido!");

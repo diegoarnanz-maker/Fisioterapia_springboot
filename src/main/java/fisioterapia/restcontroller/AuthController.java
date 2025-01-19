@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fisioterapia.modelo.entities.Perfil;
+import fisioterapia.modelo.entities.Role;
 import fisioterapia.modelo.entities.Usuario;
-import fisioterapia.modelo.service.IPerfilDao;
+import fisioterapia.modelo.service.IRoleDao;
 import fisioterapia.modelo.service.IUsuarioDao;
 
 @RestController
@@ -29,7 +29,7 @@ public class AuthController {
     private IUsuarioDao usuarioDao;
 
     @Autowired
-    private IPerfilDao perfilDao;
+    private IRoleDao perfilDao;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -50,18 +50,18 @@ public class AuthController {
 
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
-        if (usuario.getPerfiles() == null) {
-            usuario.setPerfiles(new ArrayList<>());
+        if (usuario.getRoles() == null) {
+            usuario.setRoles(new ArrayList<>());
         }
 
-        Optional<Perfil> perfilAdminOptional = perfilDao.findByName("ROLE_ADMON");
+        Optional<Role> perfilAdminOptional = perfilDao.findByName("ROLE_ADMON");
         if (perfilAdminOptional.isEmpty()) {
-            Perfil perfilAdmin = new Perfil();
+            Role perfilAdmin = new Role();
             perfilAdmin.setNombre("ROLE_ADMON");
             perfilDao.create(perfilAdmin);
-            usuario.getPerfiles().add(perfilAdmin);
+            usuario.getRoles().add(perfilAdmin);
         } else {
-            usuario.getPerfiles().add(perfilAdminOptional.get());
+            usuario.getRoles().add(perfilAdminOptional.get());
         }
 
         usuario.setFechaRegistro(new Date());

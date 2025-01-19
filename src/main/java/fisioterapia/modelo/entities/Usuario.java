@@ -61,9 +61,9 @@ public class Usuario implements Serializable {
 
     @ManyToMany
     @JoinTable(
-        name="usuario_perfiles",
+        name="usuario_roles",
         joinColumns={@JoinColumn(name="USERNAME")},
-        inverseJoinColumns={@JoinColumn(name="ID_PERFIL")}
+        inverseJoinColumns={@JoinColumn(name="ID_ROLE")}
     )
-    private List<Perfil> perfiles;
+    private List<Role> roles;
 }

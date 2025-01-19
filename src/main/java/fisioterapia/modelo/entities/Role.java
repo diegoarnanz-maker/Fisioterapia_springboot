@@ -10,14 +10,14 @@ import lombok.*;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Entity
-@Table(name="perfiles")
-public class Perfil implements Serializable {
+@Table(name="roles")
+public class Role implements Serializable {
     private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="ID_PERFIL")
-    private Long idPerfil;
+	@Column(name="ID_Role")
+    private Long idRole;
 
 	private String nombre;
 }

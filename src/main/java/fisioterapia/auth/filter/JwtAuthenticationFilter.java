@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fisioterapia.modelo.entities.Usuario;
-import fisioterapia.auth.TokenJwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,11 +33,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         this.authenticationManager = authenticationManager;
     }
 
-    // Este método es llamado cuando el usuario envía sus credenciales
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-
+        
         String username = null;
         String password = null;
 
@@ -54,14 +52,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             e.printStackTrace();
         }
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
-                password);
-
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         return this.authenticationManager.authenticate(authenticationToken);
     }
 
-    // Si la autenticación es exitosa, generamos el JWT y lo devolvemos en la
-    // respuesta
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
@@ -71,14 +65,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String username = user.getUsername();
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 
-        //Agrego los claims de los roles al JWT
         Claims claims = Jwts
                 .claims()
                 .add("authorities", new ObjectMapper().writeValueAsString(roles))
                 .add("username", username)
                 .build();
 
-        //Genero el JWT
         String jwt = Jwts.builder()
                 .subject(username)
                 .claims(claims)
@@ -89,19 +81,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + jwt);
 
-        // Respondemos con un mensaje de éxito
         Map<String, String> body = new HashMap<>();
         body.put("token", jwt);
         body.put("username", username);
         body.put("message", String.format("Hola %s, has iniciado sesión con éxito", username));
 
-        //Pasamos del objeto a un JSON
         response.getWriter().write(new ObjectMapper().writeValueAsString(body));
         response.setContentType(CONTENT_TYPE);
         response.setStatus(200);
     }
 
-    // Si la autenticación falla
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
