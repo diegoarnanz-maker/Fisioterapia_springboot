@@ -37,7 +37,8 @@ public class SpringSecurityConfig {
 
                 // Rutas públicas (sin autenticación)
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                .requestMatchers("/api/auth/crearPrimerUsuario").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/crearPrimerUsuario").permitAll()
 
                 // Rutas de usuarios (solo ADMIN puede crear y gestionar usuarios)
                 .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMON")
@@ -52,6 +53,12 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/roles").hasRole("ADMON")
                 .requestMatchers(HttpMethod.PUT, "/api/roles/{id}").hasRole("ADMON")
                 .requestMatchers(HttpMethod.DELETE, "/api/roles/{id}").hasRole("ADMON")
+
+                // Rutas de servicios (solo ADMIN puede crear, actualizar o eliminar servicios)
+                .requestMatchers(HttpMethod.GET, "/api/servicios", "/api/servicios/{id}").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/servicios").hasRole("ADMON")
+                .requestMatchers(HttpMethod.PUT, "/api/servicios/{id}").hasRole("ADMON")
+                .requestMatchers(HttpMethod.DELETE, "/api/servicios/{id}").hasRole("ADMON")
 
                 .anyRequest().authenticated())
 
@@ -87,57 +94,4 @@ public class SpringSecurityConfig {
     // return corsBean;
     // }
 
-    // @Bean
-    // SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    // return http.authorizeHttpRequests(authz -> authz
-
-    // // Rutas públicas (sin autenticación)
-    // .requestMatchers(HttpMethod.POST, "/login").permitAll()
-    // .requestMatchers("/api/auth/crearPrimerUsuario").permitAll()
-    // .requestMatchers(HttpMethod.GET, "/api/servicios",
-    // "/api/servicios/{id}").permitAll()
-    // .requestMatchers(HttpMethod.GET, "/api/usuarios/{username}").permitAll()
-
-    // // Rutas de usuarios (solo ADMIN puede crear y gestionar usuarios)
-    // .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMON")
-    // .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMON")
-    // .requestMatchers(HttpMethod.PUT, "/api/usuarios/{username}").hasRole("ADMON")
-    // .requestMatchers(HttpMethod.DELETE,
-    // "/api/usuarios/{username}").hasRole("ADMON")
-
-    // // Rutas de citas (CLIENTE puede ver y crear sus propias citas,
-    // FISIOTERAPEUTA y ADMIN pueden ver todas las citas)
-    // .requestMatchers(HttpMethod.GET, "/api/citas",
-    // "/api/citas/{id}").authenticated()
-    // .requestMatchers(HttpMethod.POST, "/api/citas").hasRole("CLIENTE")
-    // .requestMatchers(HttpMethod.PUT, "/api/citas/{id}").hasRole("CLIENTE")
-    // .requestMatchers(HttpMethod.DELETE, "/api/citas/{id}").hasRole("CLIENTE")
-
-    // // Rutas de agenda (solo los fisioterapeutas pueden gestionar agendas)
-    // .requestMatchers(HttpMethod.GET, "/api/agenda",
-    // "/api/agenda/{id}").hasRole("FISIOTERAPEUTA")
-    // .requestMatchers(HttpMethod.POST, "/api/agenda").hasRole("FISIOTERAPEUTA")
-    // .requestMatchers(HttpMethod.PUT,
-    // "/api/agenda/{id}").hasRole("FISIOTERAPEUTA")
-    // .requestMatchers(HttpMethod.DELETE,
-    // "/api/agenda/{id}").hasRole("FISIOTERAPEUTA")
-
-    // // Rutas para gestionar servicios (solo ADMIN puede crear, actualizar o
-    // eliminar servicios)
-    // .requestMatchers(HttpMethod.POST, "/api/servicios").hasRole("ADMON")
-    // .requestMatchers(HttpMethod.PUT, "/api/servicios/{id}").hasRole("ADMON")
-    // .requestMatchers(HttpMethod.DELETE, "/api/servicios/{id}").hasRole("ADMON")
-
-    // // Rutas para gestión de usuarios, solo ADMIN puede gestionarlos
-    // .anyRequest().authenticated())
-
-    // // .cors(cors -> cors.configurationSource(configurationSource()))
-    // .addFilter(new JwtAuthenticationFilter(authenticationManager()))
-    // .addFilter(new JwtValidationFilter(authenticationManager()))
-    // .csrf(config -> config.disable())
-
-    // .sessionManagement(management ->
-    // management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    // .build();
-    // }
 }

@@ -40,12 +40,20 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             throws IOException, ServletException {
 
         String header = request.getHeader(HEADER_AUTHORIZATION);
+        logger.info("Recibiendo la cabecera Authorization: {}", header);
 
         if (header == null || !header.startsWith(PREFIX_TOKEN)) {
-            logger.warn("No se encontró el token en la cabecera");
+            logger.info("No se encontró token en la cabecera para la ruta: {}", request.getRequestURI());
             chain.doFilter(request, response);
             return;
         }
+
+        // if (header == null || !header.startsWith(PREFIX_TOKEN)) {
+        // logger.warn("No se encontró el token en la cabecera");
+        // response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        // response.getWriter().write("{\"error\": \"Token is missing or invalid\"}");
+        // return;
+        // }
 
         String token = header.replace(PREFIX_TOKEN, "");
         logger.info("Token recibido para validación");
@@ -72,7 +80,10 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             logger.info("Roles extraídos: {}", roles);
             logger.info("Usuario autenticado: {}", username);
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, roles);
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username,
+                    null, roles);
+            logger.info("Token de autenticación configurado con roles: {}", roles);
+
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
             chain.doFilter(request, response);

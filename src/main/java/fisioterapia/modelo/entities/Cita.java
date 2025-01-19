@@ -32,6 +32,7 @@ public class Cita implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_CITA")
     private int idCita;
 
     @Temporal(TemporalType.DATE)

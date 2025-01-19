@@ -17,27 +17,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fisioterapia.modelo.entities.Role;
-import fisioterapia.modelo.service.IRoleDao;
+import fisioterapia.modelo.entities.Servicio;
+import fisioterapia.modelo.service.IServicioDao;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/roles")
-public class RoleController {
+@RequestMapping("/api/servicios")
+public class ServicioController {
 
     @Autowired
-    private IRoleDao roleDao;
+    private IServicioDao servicioDao;
 
     @GetMapping
-    public List<Role> listar() {
-        return roleDao.findAll();
+    public List<Servicio> listar() {
+        return servicioDao.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> buscar(@PathVariable long id) {
-        Optional<Role> role = roleDao.read(id);
-        if (role.isPresent()) {
-            return ResponseEntity.status(HttpStatus.OK).body(role.get());
+        Optional<Servicio> servicio = servicioDao.read(id);
+        if (servicio.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK).body(servicio.get());
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Collections.singletonMap("error", "Usuario no encontrado" + id));
@@ -45,45 +45,45 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Role role, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.getAllErrors());
-        }
-        roleDao.create(role);
-        return ResponseEntity.status(HttpStatus.CREATED).body(role);
+    public ResponseEntity<?> crear(@Valid @RequestBody Servicio servicio) {
+        servicioDao.create(servicio);
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicio);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable long id, @Valid @RequestBody Role role, BindingResult result) {
+    public ResponseEntity<?> actualizar(@PathVariable long id, @Valid @RequestBody Servicio servicio,
+            BindingResult result) {
         if (result.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.getAllErrors());
         }
 
-        Optional<Role> roleOptional = roleDao.read(id);
-        if (roleOptional.isPresent()) {
-            
-            Role existingRole = roleOptional.get();
+        Optional<Servicio> servicioOptional = servicioDao.read(id);
+        if (servicioOptional.isPresent()) {
+            Servicio existingServicio = servicioOptional.get();
 
-            existingRole.setNombre(role.getNombre());
+            existingServicio.setNombre(servicio.getNombre());
+            existingServicio.setDescripcion(servicio.getDescripcion());
+            existingServicio.setDuracion(servicio.getDuracion());
+            existingServicio.setPrecio(servicio.getPrecio());
 
-            roleDao.update(existingRole);
+            servicioDao.update(existingServicio);
 
-            return ResponseEntity.status(HttpStatus.OK).body(existingRole);
+            return ResponseEntity.status(HttpStatus.OK).body(existingServicio);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("error", "Role no encontrado con id " + id));
+                    .body(Collections.singletonMap("error", "Servicio no encontrado con id " + id));
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable long id) {
-        Optional<Role> role = roleDao.read(id);
-        if (role.isPresent()) {
-            roleDao.delete(id);
+        Optional<Servicio> servicio = servicioDao.read(id);
+        if (servicio.isPresent()) {
+            servicioDao.delete(id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("error", "Role no encontrado" + id));
+                    .body(Collections.singletonMap("error", "Servicio no encontrado" + id));
         }
     }
 

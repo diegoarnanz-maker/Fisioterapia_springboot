@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fisioterapia.modelo.entities.Role;
 import fisioterapia.modelo.entities.Usuario;
+import fisioterapia.modelo.service.IRoleDao;
 import fisioterapia.modelo.service.IUsuarioDao;
-import fisioterapia.repository.IRoleRepository;
 import jakarta.validation.Valid;
 
 @RestController
@@ -33,7 +33,7 @@ public class UsuarioController {
     private IUsuarioDao usuarioDao;
 
     @Autowired
-    private IRoleRepository roleRepository;
+    private IRoleDao roleDao;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -76,7 +76,7 @@ public class UsuarioController {
             List<Role> rolesList = new ArrayList<>(usuario.getRoles());
 
             for (Role role : rolesList) {
-                Role existingRole = roleRepository.findByNombre(role.getNombre()).orElse(null);
+                Role existingRole = roleDao.findByName(role.getNombre()).orElse(null);
                 if (existingRole == null) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body("El rol " + role.getNombre() + " no es válido.");
