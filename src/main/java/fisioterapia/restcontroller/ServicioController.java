@@ -40,7 +40,7 @@ public class ServicioController {
             return ResponseEntity.status(HttpStatus.OK).body(servicio.get());
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonMap("error", "Usuario no encontrado" + id));
+                    .body(Collections.singletonMap("error", "Servicio no encontrado " + id));
         }
     }
 

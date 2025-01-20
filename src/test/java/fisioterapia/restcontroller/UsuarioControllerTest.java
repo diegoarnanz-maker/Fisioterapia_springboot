@@ -41,6 +41,7 @@ public class UsuarioControllerTest {
     @Autowired
     private IRoleDao roleDao;
 
+    // Solo ROLE_ADMON gestiona usuarios
     @Test
     public void testListarUsuarios() throws Exception {
         String username = "admin";
@@ -62,7 +63,6 @@ public class UsuarioControllerTest {
 
         String token = obtenerTokenJwt(username, password);
 
-        // Aquí, usa un usuario que sabes que existe en la base de datos
         mockMvc.perform(get("/api/usuarios/{username}", "admin")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -77,7 +77,6 @@ public class UsuarioControllerTest {
 
         String token = obtenerTokenJwt(username, password);
 
-        // Crear un nuevo usuario
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsername("nuevoUsuario");
         nuevoUsuario.setPassword("12345678");
@@ -88,19 +87,16 @@ public class UsuarioControllerTest {
         nuevoUsuario.setFechaRegistro(new Date());
         nuevoUsuario.setEnabled(true);
 
-        // Asignamos el rol ROLE_CLIENTE
         Role roleCliente = roleDao.findByName("ROLE_CLIENTE").orElseThrow(() -> new Exception("Role no encontrado"));
         nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleCliente)));
 
-        // Convertir el usuario a JSON
         String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
 
-        // Realizamos la petición para crear el usuario con ROLE_CLIENTE
         mockMvc.perform(post("/api/usuarios")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonUsuario))
-                .andExpect(status().isCreated()) // Se espera que el usuario sea creado
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value("nuevoUsuario"))
                 .andExpect(jsonPath("$.email").value("nuevoUsuario@example.com"))
                 .andExpect(jsonPath("$.roles[0].nombre").value("ROLE_CLIENTE"));
@@ -108,12 +104,11 @@ public class UsuarioControllerTest {
 
     @Test
     public void testCrearUsuarioConRoleAdmon() throws Exception {
-        String username = "admin"; // Usuario con el rol ROLE_ADMON
+        String username = "admin";
         String password = "12345678";
 
         String token = obtenerTokenJwt(username, password);
 
-        // Crear un nuevo usuario con ROLE_ADMON
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsername("nuevoUsuarioAdmon");
         nuevoUsuario.setPassword("12345678");
@@ -124,19 +119,16 @@ public class UsuarioControllerTest {
         nuevoUsuario.setFechaRegistro(new Date());
         nuevoUsuario.setEnabled(true);
 
-        // Asignamos el rol ROLE_ADMON
         Role roleAdmon = roleDao.findByName("ROLE_ADMON").orElseThrow(() -> new Exception("Role no encontrado"));
         nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleAdmon)));
 
-        // Convertir el usuario a JSON
         String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
 
-        // Realizamos la petición para crear el usuario con ROLE_ADMON
         mockMvc.perform(post("/api/usuarios")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonUsuario))
-                .andExpect(status().isCreated()) // Se espera que el usuario sea creado
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.username").value("nuevoUsuarioAdmon"))
                 .andExpect(jsonPath("$.email").value("nuevoUsuarioAdmon@example.com"))
                 .andExpect(jsonPath("$.roles[0].nombre").value("ROLE_ADMON"));
@@ -149,7 +141,6 @@ public class UsuarioControllerTest {
 
         String token = obtenerTokenJwt(username, password);
 
-        // Crear un nuevo usuario con ROLE_ADMON
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsername("nuevoUsuario");
         nuevoUsuario.setPassword("12345678");
@@ -160,14 +151,11 @@ public class UsuarioControllerTest {
         nuevoUsuario.setFechaRegistro(new Date());
         nuevoUsuario.setEnabled(true);
 
-        // Asignamos el rol ROLE_ADMON
         Role roleAdmon = roleDao.findByName("ROLE_ADMON").orElseThrow(() -> new Exception("Role no encontrado"));
         nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleAdmon)));
 
-        // Convertir el usuario a JSON
         String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
 
-        // Intentar crear un usuario con ROLE_ADMON sin ser un admin
         mockMvc.perform(post("/api/usuarios")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -177,12 +165,11 @@ public class UsuarioControllerTest {
 
     @Test
     public void testCrearUsuarioConRoleFisioSinPermiso() throws Exception {
-        String username = "fisioterapeuta"; // Usuario sin el rol de ADMIN
+        String username = "fisioterapeuta";
         String password = "12345678";
 
         String token = obtenerTokenJwt(username, password);
 
-        // Crear un nuevo usuario con ROLE_FISIO
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsername("nuevoUsuario");
         nuevoUsuario.setPassword("12345678");
@@ -193,15 +180,12 @@ public class UsuarioControllerTest {
         nuevoUsuario.setFechaRegistro(new Date());
         nuevoUsuario.setEnabled(true);
 
-        // Asignamos el rol ROLE_FISIO
         Role roleFisio = roleDao.findByName("ROLE_FISIOTERAPEUTA")
                 .orElseThrow(() -> new Exception("Role no encontrado"));
         nuevoUsuario.setRoles(new ArrayList<>(Arrays.asList(roleFisio)));
 
-        // Convertir el usuario a JSON
         String jsonUsuario = objectMapper.writeValueAsString(nuevoUsuario);
 
-        // Intentar crear un usuario con ROLE_FISIO sin ser un admin
         mockMvc.perform(post("/api/usuarios")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)

@@ -32,6 +32,8 @@ public class RoleControllerTest {
     @Autowired
     private IRoleDao roleDao;
 
+    // Solo ROLE_ADMON gestiona roles
+
     @Test
     public void testListar() throws Exception {
         String username = "admin";

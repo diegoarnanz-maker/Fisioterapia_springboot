@@ -16,7 +16,7 @@ public interface IUsuarioRepository extends JpaRepository<Usuario, String> {
     @Query("SELECT u FROM Usuario u JOIN u.roles r WHERE r.nombre = :roleName")
     List<Usuario> findByRole(@Param("roleName") String roleName);
 
-    Optional<Usuario> findByUsername(String name);
+    Optional<Usuario> findByUsername(String username);
 
     boolean existsByEmail(String email);
 

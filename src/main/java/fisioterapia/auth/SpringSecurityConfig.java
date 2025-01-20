@@ -35,30 +35,40 @@ public class SpringSecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(authz -> authz
 
-                // Rutas públicas (sin autenticación)
+                // Rutas públicas GENERALES (sin autenticación)
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/crearPrimerUsuario").permitAll()
 
-                // Rutas de usuarios (solo ADMIN puede crear y gestionar usuarios)
+                // Rutas de USUARIOS (solo ADMIN puede crear y gestionar usuarios)
                 .requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMON")
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/{username}").hasRole("ADMON")
                 .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMON")
                 .requestMatchers(HttpMethod.PUT, "/api/usuarios/{username}").hasRole("ADMON")
                 .requestMatchers(HttpMethod.DELETE, "/api/usuarios/{username}").hasRole("ADMON")
 
-                //Rutas de roles (solo ADMIN puede crear y gestionar roles)
+                // Rutas de ROLES (solo ADMIN puede crear y gestionar roles)
                 .requestMatchers(HttpMethod.GET, "/api/roles").hasRole("ADMON")
                 .requestMatchers(HttpMethod.GET, "/api/roles/{id}").hasRole("ADMON")
                 .requestMatchers(HttpMethod.POST, "/api/roles").hasRole("ADMON")
                 .requestMatchers(HttpMethod.PUT, "/api/roles/{id}").hasRole("ADMON")
                 .requestMatchers(HttpMethod.DELETE, "/api/roles/{id}").hasRole("ADMON")
 
-                // Rutas de servicios (solo ADMIN puede crear, actualizar o eliminar servicios)
+                // Rutas de SERVICIOS (solo ADMIN puede crear, actualizar o eliminar servicios)
                 .requestMatchers(HttpMethod.GET, "/api/servicios", "/api/servicios/{id}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/servicios").hasRole("ADMON")
                 .requestMatchers(HttpMethod.PUT, "/api/servicios/{id}").hasRole("ADMON")
                 .requestMatchers(HttpMethod.DELETE, "/api/servicios/{id}").hasRole("ADMON")
+
+                // Rutas de AGENDAS
+                // Rutas publicas (Clientes pueden ver las agendas de los fisios para ver
+                // disponibilidad)
+                .requestMatchers(HttpMethod.GET, "/api/agendas/**").permitAll()
+                // Rutas protegidas por role (fisioterapeutas pueden gestionar sus propias
+                // agendas, administradores pueden gestionar todas)
+                .requestMatchers(HttpMethod.POST, "/api/agendas").hasAnyRole("ADMON", "FISIOTERAPEUTA")
+                .requestMatchers(HttpMethod.PUT, "/api/agendas/{id}").hasAnyRole("ADMON", "FISIOTERAPEUTA")
+                .requestMatchers(HttpMethod.DELETE, "/api/agendas/{id}").hasAnyRole("ADMON", "FISIOTERAPEUTA")
 
                 .anyRequest().authenticated())
 

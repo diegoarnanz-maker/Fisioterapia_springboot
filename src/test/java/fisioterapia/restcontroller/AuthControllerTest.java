@@ -26,10 +26,10 @@ public class AuthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    
+    // Publica - Header con secret-key (fisioterapia)
     @Test
     public void testCrearPrimerUsuario() throws Exception {
-        // Crea un objeto Map con los datos del usuario
         Map<String, Object> usuario = new HashMap<>();
         usuario.put("username", "admin");
         usuario.put("password", "admin123");
@@ -39,24 +39,20 @@ public class AuthControllerTest {
         usuario.put("direccion", "Calle Admin, 123");
         usuario.put("enabled", true);
 
-        // Convierte el Map a JSON String usando ObjectMapper
         String usuarioPayload = new ObjectMapper().writeValueAsString(usuario);
 
-        // Llamada al endpoint para crear el primer usuario con la clave secreta
         mockMvc.perform(post("/api/auth/crearPrimerUsuario")
-                .header("Secret-Key", "fisioterapia") // Proporciona la clave secreta
+                .header("Secret-Key", "fisioterapia")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuarioPayload))
-                .andExpect(status().isCreated()) // Verifica que la respuesta es un HTTP 201 (creado)
-                .andExpect(jsonPath("$.username").value("admin")) // Verifica que el usuario creado tiene el nombre
-                                                                  // "admin"
-                .andExpect(jsonPath("$.roles[0].nombre").value("ROLE_ADMON")); // Verifica que el rol asignado es
-                                                                               // ROLE_ADMON
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.username").value("admin"))
+                .andExpect(jsonPath("$.roles[0].nombre").value("ROLE_ADMON"));
     }
-
+    
+    // Publica
     @Test
     public void testCrearPrimerUsuarioConSecretKeyIncorrecto() throws Exception {
-        // Crea un objeto Map con los datos del usuario
         Map<String, Object> usuario = new HashMap<>();
         usuario.put("username", "admin");
         usuario.put("password", "admin123");
@@ -66,22 +62,19 @@ public class AuthControllerTest {
         usuario.put("direccion", "Calle Admin, 123");
         usuario.put("enabled", true);
 
-        // Convierte el Map a JSON String usando ObjectMapper
         String usuarioPayload = new ObjectMapper().writeValueAsString(usuario);
 
-        // Llamada al endpoint para crear el primer usuario con la clave secreta
-        // incorrecta
         mockMvc.perform(post("/api/auth/crearPrimerUsuario")
-                .header("Secret-Key", "wrongsecret") // Clave incorrecta
+                .header("Secret-Key", "wrongsecret")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuarioPayload))
-                .andExpect(status().isForbidden()) // Se espera que el código de estado sea 403 Forbidden
-                .andExpect(jsonPath("$.error").value("Acceso denegado")); // Verifica el mensaje de error
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Acceso denegado"));
     }
-
+    
+    // Publica
     @Test
     public void testCrearPrimerUsuarioCuandoYaExiste() throws Exception {
-        // Crear un usuario administrador previamente para simular que ya existe
         Map<String, Object> usuarioExistente = new HashMap<>();
         usuarioExistente.put("username", "admin");
         usuarioExistente.put("password", "12345678");
@@ -91,25 +84,23 @@ public class AuthControllerTest {
         usuarioExistente.put("direccion", "Calle Admin, 123");
         usuarioExistente.put("enabled", true);
 
-        // Convierte el Map a JSON String usando ObjectMapper
         String usuarioExistentePayload = new ObjectMapper().writeValueAsString(usuarioExistente);
 
-        // Crear el primer usuario administrador
         mockMvc.perform(post("/api/auth/crearPrimerUsuario")
                 .header("Secret-Key", "fisioterapia")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuarioExistentePayload))
                 .andExpect(status().isCreated());
 
-        // Intentar crear otro administrador
         mockMvc.perform(post("/api/auth/crearPrimerUsuario")
                 .header("Secret-Key", "fisioterapia")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuarioExistentePayload))
-                .andExpect(status().isForbidden()) // Espera que el código sea 403
-                .andExpect(jsonPath("$.error").value("Ya existe un usuario administrador")); // Verifica el error
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Ya existe un usuario administrador"));
     }
 
+    // Requiere header con jwt
     @Test
     public void testAccesoConTokenValido() throws Exception {
         String username = "admin";
