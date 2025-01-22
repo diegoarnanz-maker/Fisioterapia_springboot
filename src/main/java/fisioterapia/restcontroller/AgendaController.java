@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import fisioterapia.dto.AgendaDto;
 import fisioterapia.modelo.entities.Agenda;
 import fisioterapia.modelo.entities.Usuario;
 import fisioterapia.modelo.service.IAgendaDao;
@@ -78,19 +79,37 @@ public class AgendaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Agenda agenda, BindingResult result) {
+    public ResponseEntity<?> crear(@Valid @RequestBody AgendaDto agendaDto, BindingResult result) {
+
+        System.out.println("Solicitud recibida: " + agendaDto);  // Log adicional para ver el DTO recibido
+
         if (result.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.getAllErrors());
         }
 
-        Usuario fisioterapeuta = usuarioDao.findByUsername(agenda.getFisioterapeuta().getUsername());
+        System.out.println("Username recibido: " + agendaDto.getIdUsuarioFisio());
+
+        // Verifica que el idUsuarioFisio (username) no sea null o vacío
+        if (agendaDto.getIdUsuarioFisio() == null || agendaDto.getIdUsuarioFisio().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fisioterapeuta no proporcionado");
+        }
+
+        // Buscamos al fisioterapeuta por el username
+        Usuario fisioterapeuta = usuarioDao.findByUsername(agendaDto.getIdUsuarioFisio());
 
         if (fisioterapeuta == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Fisioterapeuta no encontrado");
         }
 
+        // Creamos la agenda
+        Agenda agenda = new Agenda();
         agenda.setFisioterapeuta(fisioterapeuta);
+        agenda.setFecha(agendaDto.getFecha());
+        agenda.setHoraInicio(agendaDto.getHoraInicio());
+        agenda.setHoraFin(agendaDto.getHoraFin());
+        agenda.setDisponible(agendaDto.isDisponible());
 
+        // Guardamos la nueva agenda
         Agenda nuevaAgenda = agendaDao.create(agenda);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaAgenda);
