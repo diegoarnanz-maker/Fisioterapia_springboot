@@ -1,10 +1,15 @@
 package fisioterapia.restcontroller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +22,23 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import fisioterapia.dto.AgendaDto;
 import fisioterapia.modelo.entities.Agenda;
 import fisioterapia.modelo.entities.Usuario;
 import fisioterapia.modelo.service.IAgendaDao;
 import fisioterapia.modelo.service.IUsuarioDao;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/agendas")
 public class AgendaController {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private IAgendaDao agendaDao;
@@ -79,40 +90,9 @@ public class AgendaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody AgendaDto agendaDto, BindingResult result) {
-
-        System.out.println("Solicitud recibida: " + agendaDto);  // Log adicional para ver el DTO recibido
-
-        if (result.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.getAllErrors());
-        }
-
-        System.out.println("Username recibido: " + agendaDto.getIdUsuarioFisio());
-
-        // Verifica que el idUsuarioFisio (username) no sea null o vacío
-        if (agendaDto.getIdUsuarioFisio() == null || agendaDto.getIdUsuarioFisio().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Fisioterapeuta no proporcionado");
-        }
-
-        // Buscamos al fisioterapeuta por el username
-        Usuario fisioterapeuta = usuarioDao.findByUsername(agendaDto.getIdUsuarioFisio());
-
-        if (fisioterapeuta == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Fisioterapeuta no encontrado");
-        }
-
-        // Creamos la agenda
-        Agenda agenda = new Agenda();
-        agenda.setFisioterapeuta(fisioterapeuta);
-        agenda.setFecha(agendaDto.getFecha());
-        agenda.setHoraInicio(agendaDto.getHoraInicio());
-        agenda.setHoraFin(agendaDto.getHoraFin());
-        agenda.setDisponible(agendaDto.isDisponible());
-
-        // Guardamos la nueva agenda
-        Agenda nuevaAgenda = agendaDao.create(agenda);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaAgenda);
+    public ResponseEntity<?> crear(@RequestBody String rawJson) {
+        System.out.println("JSON crudo recibido: " + rawJson);
+        return ResponseEntity.ok().body("Procesado correctamente");
     }
 
     @PutMapping("/{id}")
@@ -151,6 +131,21 @@ public class AgendaController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Collections.singletonMap("error", "Agenda no encontrada " + id));
+        }
+    }
+
+    @PostMapping("/debug-json")
+    public ResponseEntity<?> debugJson(HttpServletRequest request) {
+        try {
+            String body = new BufferedReader(new InputStreamReader(request.getInputStream()))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+            System.out.println("JSON crudo recibido en el controlador: " + body);
+            return ResponseEntity.ok("JSON procesado correctamente");
+        } catch (IOException e) {
+            System.out.println("Error al leer el cuerpo de la solicitud:");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al procesar el JSON");
         }
     }
 

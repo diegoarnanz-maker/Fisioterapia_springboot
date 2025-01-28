@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -39,18 +38,12 @@ public class Agenda implements Serializable {
 
     private Date fecha;
 
-    @NotNull(message = "La hora de inicio no puede ser nula")
     @Column(name = "HORA_INICIO")
     private int horaInicio;
 
-    @NotNull(message = "La hora de fin no puede ser nula")
     @Column(name = "HORA_FIN")
     private int horaFin;
 
     private boolean disponible;
 
-    //METODOS PROPIOS
-    public String getFisioterapeutaUsername() {
-        return this.fisioterapeuta != null ? this.fisioterapeuta.getUsername() : null;
-    }
 }

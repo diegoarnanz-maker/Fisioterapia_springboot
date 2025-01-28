@@ -66,7 +66,7 @@ public class SpringSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/agendas/**").permitAll()
                 // Rutas protegidas por role (fisioterapeutas pueden gestionar sus propias
                 // agendas, administradores pueden gestionar todas)
-                .requestMatchers(HttpMethod.POST, "/api/agendas").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/agendas/**").permitAll()
                 .requestMatchers(HttpMethod.PUT, "/api/agendas/{id}").hasAnyRole("ADMON", "FISIOTERAPEUTA")
                 .requestMatchers(HttpMethod.DELETE, "/api/agendas/{id}").hasAnyRole("ADMON", "FISIOTERAPEUTA")
 
